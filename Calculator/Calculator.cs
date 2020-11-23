@@ -3,9 +3,6 @@ using System.Collections.Generic;
 
 namespace CalculatorNS
 {
-    /// <summary>
-    /// Bank account demo class.
-    /// </summary>
     public class Calculator
     {
         private enum Status
@@ -376,8 +373,6 @@ namespace CalculatorNS
 
             return result;
         }
-
-        // 
 
         // Main
         public static void Main()

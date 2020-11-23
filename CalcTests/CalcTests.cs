@@ -58,7 +58,7 @@ namespace CalcTests
             int actual = calc.evaluateInput(inputStr);
 
             // Assert
-            int expected = 3 + 1 + 4 / 6 * 6 * 8 / 3 - 4 * 4 + 7;
+            int expected = 3 + 1 + 4 / 6 * 6 * 8 / 3 - 4 * 4 + 7; // -5
             Assert.AreEqual(expected, actual, "FAIL: Failed to evaluate expression.");
         }
 
@@ -73,7 +73,7 @@ namespace CalcTests
             int actual = calc.evaluateInput(inputStr);
 
             // Assert
-            int expected = 10 - 2 * 6 / 4;
+            int expected = 7;
             Assert.AreEqual(expected, actual, "FAIL: Failed to evaluate expression.");
         }
 
