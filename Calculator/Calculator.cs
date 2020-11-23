@@ -53,6 +53,10 @@ namespace CalculatorNS
                 m_operator = operator_str;
             }
         }
+        public string parseInput(string inputStr)
+        {
+            return inputStr;
+        }
 
         public int calculate()
         {
@@ -128,6 +132,7 @@ namespace CalculatorNS
             }
 
             Console.Write("Invalid operator: " + operator_str + ".  Expected: +,-,*,/\n");
+            m_status = Status.INVALID_INPUT;
             return false;
         }
 
@@ -138,18 +143,37 @@ namespace CalculatorNS
             {
                 result = Int32.Parse(inpStr);
             }
-            catch (FormatException)
+            catch (FormatException e)
             {
-                Console.WriteLine($"  ERROR: Unable to parse '{inpStr}' to int.  Only integers are supported.");
+                Console.WriteLine($"  ERROR: Unable to parse '{inpStr}' to int.  Only integers are supported.  '{e}'");
                 m_status = Status.INVALID_INPUT;
             }
-            
+            catch (System.OverflowException e)
+            {
+
+                Console.WriteLine($"  ERROR: Unable to parse '{inpStr}' to int.  '{e}'");
+                m_status = Status.OVERFLOW;
+            }
+
             return result;
         }
 
         private int add(int val1, int val2)
         {
-            return val1 + val2;
+            int result = -1;
+
+            try
+            {
+                result = val1 + val2;
+            }
+            catch (System.OverflowException e)
+            {
+
+                Console.WriteLine($"  ERROR: Unable to add values.  '{e}'");
+                m_status = Status.INVALID_INPUT;
+            }
+
+            return result;
         }
 
         private int subtract(int val1, int val2)
@@ -175,127 +199,7 @@ namespace CalculatorNS
 
         public static void Main()
         {
-            string result;
-            string expected;
-
-            Calculator calc = new Calculator("10", "11", "+");
-            
-            calc.setLeft("9");
-            calc.setRight("1");
-            calc.setOperator("+");
-            calc.calculate();
-            expected = "10";
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            } else
-            {
-                Console.Write(" -- FAIL.. Expected: " + expected + ", calculated: " + result + "\n");
-            }
-
-            calc.setLeft("4");
-            calc.setRight("-7");
-            calc.setOperator("-");
-            calc.calculate();
-            expected = "11";
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: " + expected + ", calculated: " + result + "\n");
-            }
-
-            calc.setLeft("8");
-            calc.setRight("8");
-            calc.setOperator("*");
-            calc.calculate();
-            expected = "64";
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: " + expected + ", calculated: " + result + "\n");
-            }
-
-            calc.setLeft("12");
-            calc.setRight("3");
-            calc.setOperator("/");
-            calc.calculate();
-            expected = "4";
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: " + expected + ", calculated: " + result + "\n");
-            }
-
-            calc.setLeft("256");
-            calc.setRight("0");
-            calc.setOperator("/");
-            calc.calculate();
-            expected = null;
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: ERROR, calculated: " + result + "\n");
-            }
-
-            calc.setLeft("");
-            calc.setRight("423");
-            calc.setOperator("+");
-            calc.calculate();
-            expected = null;
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: ERROR, calculated: " + result + "\n");
-            }
-
-            calc.setLeft("foo");
-            calc.setRight("14");
-            calc.setOperator("+");
-            calc.calculate();
-            expected = null;
-            result = calc.getResult();
-            if (String.Equals(expected, result))
-            {
-                Console.Write(" -- PASS\n");
-            }
-            else
-            {
-                Console.Write(" -- FAIL.. Expected: ERROR, calculated: " + result + "\n");
-            }
-
-            //calc.setLeft("8270394857234085720349857203498572304985273049852730495827340598237450298347520983475234");
-            //calc.setRight("8270394857234085720342708457230495874502983349852730495827340598237450298347520986756777");
-            //calc.setOperator("/");
-            //calc.calculate();
-            //Unhandled exception. System.OverflowException: Value was either too large or too small for an Int32.
-            //   at System.Number.ThrowOverflowOrFormatException(Parsingm_status m_status, TypeCode type)
-            //   at System.Number.ParseInt32(ReadOnlySpan`1 value, NumberStyles styles, NumberFormatInfo info)
-            //   at System.Int32.Parse(String s)
-            //   at BankAccountNS.Calculator.strToInt(String inpStr) in D:\repos\Calculator\Calculator\Program.cs:line 84
-            //   at BankAccountNS.Calculator.setLeft(String numStr) in D:\repos\Calculator\Calculator\Program.cs:line 24
-            //   at BankAccountNS.Calculator.Main() in D:\repos\Calculator\Calculator\Program.cs:line 131
-
+            Calculator calc = new Calculator();
         }
     }
 }

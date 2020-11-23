@@ -41,6 +41,12 @@ namespace CalcTests
             TestCalculate("foo", "14", "+", "ERROR: INVALID_INPUT");
         }
 
+        [TestMethod]
+        public void TestOverflow()
+        {
+            TestCalculate("102423452345234523452345234", "11234524635342452345234523452345", "+", "ERROR: OVERFLOW");
+        }
+
         public void TestCalculate(string leftVal, string rightVal, string operatorStr, string expected)
         {
             // Arrange
