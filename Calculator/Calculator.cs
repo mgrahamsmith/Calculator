@@ -227,7 +227,7 @@ namespace CalculatorNS
                 Console.WriteLine("NUMBERS: " + String.Join(",", numbers.ToArray()));
             }
 
-            // Finish evalution if opeartor queue is not empty.
+            // Finish evalution if operator queue is not empty.
             while (operatorChars.Count > 0)
             {
                 if (numbers.Count >= 2)
