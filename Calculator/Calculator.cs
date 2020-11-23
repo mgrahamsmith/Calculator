@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BankAccountNS
+namespace CalculatorNS
 {
     /// <summary>
     /// Bank account demo class.
@@ -12,7 +12,8 @@ namespace BankAccountNS
             GOOD,
             DIVIDE_BY_ZERO,
             INVALID_INPUT,
-            OVERFLOW
+            OVERFLOW,
+            UNKOWN
         }
 
         private int m_leftVal;
@@ -20,6 +21,13 @@ namespace BankAccountNS
         private string m_operator;
         private int m_result;
         private Status m_status = Status.GOOD;
+
+        public Calculator()
+        {
+            setLeft("0");
+            setRight("1");
+            setOperator("+");
+        }
 
         public Calculator(string leftVal, string rightVal, string optr)
         {
@@ -88,19 +96,19 @@ namespace BankAccountNS
             }
             else if (m_status == Status.DIVIDE_BY_ZERO)
             {
-                result = "An error occured: " + Status.DIVIDE_BY_ZERO.ToString();
+                result = "ERROR: " + Status.DIVIDE_BY_ZERO.ToString();
             }
             else if (m_status == Status.OVERFLOW)
             {
-                result = "An error occured: " + Status.OVERFLOW.ToString();
+                result = "ERROR: " + Status.OVERFLOW.ToString();
             }
             else if (m_status == Status.INVALID_INPUT)
             {
-                result = "An error occured: " + Status.INVALID_INPUT.ToString();
+                result = "ERROR: " + Status.INVALID_INPUT.ToString();
             }
             else
             {
-                result = "An unkown error occured.";
+                result = "ERROR: " + Status.UNKOWN.ToString();
             }
 
             Console.Write("  Result: " + result + "\n");
