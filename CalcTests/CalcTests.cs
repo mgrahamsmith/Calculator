@@ -48,18 +48,33 @@ namespace CalcTests
         }
 
         [TestMethod]
-        public void TestInputParse()
+        public void TestEvaluateInput1()
         {
             // Arrange
             CalculatorNS.Calculator calc = new CalculatorNS.Calculator();
 
             // Action
             string inputStr = "3+1+4/6*6*8/3-4*4+7";
-            string actual = calc.parseInput(inputStr);
+            int actual = calc.evaluateInput(inputStr);
 
             // Assert
-            string expected = "3 1 + 4 6 / 6 * 8 * 3 / + 4 4 * - 7 +";
-            Assert.AreEqual(expected, actual, "FAIL: Failed to parse expression.");
+            int expected = 3 + 1 + 4 / 6 * 6 * 8 / 3 - 4 * 4 + 7;
+            Assert.AreEqual(expected, actual, "FAIL: Failed to evaluate expression.");
+        }
+
+        [TestMethod]
+        public void TestEvaluateInput2()
+        {
+            // Arrange
+            CalculatorNS.Calculator calc = new CalculatorNS.Calculator();
+
+            // Action
+            string inputStr = "10-2*6/4";
+            int actual = calc.evaluateInput(inputStr);
+
+            // Assert
+            int expected = 10 - 2 * 6 / 4;
+            Assert.AreEqual(expected, actual, "FAIL: Failed to evaluate expression.");
         }
 
         public void TestCalculate(string leftVal, string rightVal, string operatorStr, string expected)

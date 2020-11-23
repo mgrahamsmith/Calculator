@@ -140,53 +140,124 @@ namespace CalculatorNS
 
 
         // Methods for Calculator Project Part 2 ///////////////////////////////
-        public string parseInput(string inputStr)
-        { 
-            string parsedResult = "";
 
-            char[] parsedChars = inputStr.ToCharArray();
-            Queue<char> operatorChars = new Queue<char>();  // Queue for operators
-            Queue<int> numbers = new Queue<int>();          // Queue for Int32 operands
+        // Parse and evaluate math expression string input
+        // Shunting-yard algorithm
+        public int evaluateInput(string inputStr)
+        { 
+            int result = -1;
+            string numStr = "";
+            bool operatorMismatch = false;
+
+            char[] parsedChars = inputStr.ToCharArray(); // Get char array from input str
+            Stack<char> operatorChars = new Stack<char>();  // Stack for operators
+            Stack<int> numbers = new Stack<int>();          // Stack for Int32 operands
 
             for (int i=0; i<parsedChars.Length; i++)
             {
-                string numStr = "";
                 char tmpChar = parsedChars[i];
 
-                int opPrec = getPrecedence(tmpChar);
+                int opPrec = getPrecedence(tmpChar); // returns -1 if not an operator
 
-                if (opPrec != -1)
-                {
-                    // If we reached an operator, check numStr to see if we
-                    // need to enqueu on the number Queue.
-                    if (!String.Equals(numStr, ""))
-                    {
-                        numbers.Enqueue(strToInt(numStr));
-                        // Reset numStr
-                        numStr = "";
-                    }
-
-                    if (opPrec > getPrecedence(operatorChars.Peek()))
-                    {
-
-                    }
-                    operatorChars.Enqueue(tmpChar);
-                }
-                else if (System.Char.IsDigit(tmpChar))
+                if (System.Char.IsDigit(tmpChar)) // is the char a digit?
                 {
                     numStr += tmpChar;
+                    if (i == parsedChars.Length - 1)
+                    {
+                        Console.WriteLine("END OF INPUT");
+                        numbers.Push(strToInt(numStr));
+                        numStr = ""; // Reset numStr to empty
+                    }
                 }
-                else
+                else if (opPrec != -1) // is the char an operator?
+                {
+                    // If operator reached and numStr is not empty, push (int)numStr to numbers stack
+                    if (numStr != "")
+                    {
+                        int numToPush = strToInt(numStr);
+                        numbers.Push(numToPush);
+                        numStr = ""; // Reset numStr to empty
+                    }
+
+                    if (operatorChars.Count == 0) // if empty (no operators in stack), push this one
+                    {
+                        operatorChars.Push(tmpChar);
+                    }
+                    // if not empty and op precedence is greater that of the
+                    // last in stack, push this operator
+                    else if (opPrec > getPrecedence(operatorChars.Peek()))
+                    {
+                        operatorChars.Push(tmpChar);
+                    }
+                    // stack is not empty, but tmpChar operator does not take precedence over the
+                    // last in stack, so operate on the last two ints in numbers stack, and push result
+                    // to numbers stack. 
+                    else
+                    {
+                        if (numbers.Count >= 2)
+                        {
+                            setRight(numbers.Pop().ToString());
+                            setLeft(numbers.Pop().ToString());
+                            setOperator(operatorChars.Pop().ToString());
+                            int tmpNum = calculate();
+                            numbers.Push(tmpNum);
+                            operatorChars.Push(tmpChar);
+                        }
+                        else
+                        {
+                            // Not enough numbers in queue at time of operator evaluation.  An operator/
+                            // operand mismatch has occured.
+                            operatorMismatch = true;
+                            break; // exit for log since error occured.
+                        }
+                    }
+                }
+                else // char is not an Int32 or a valid operator, INVALID_INPUT
                 {
                     string errMsg = $"ERROR: Invalid input string.  Expected expression with no spaces" +
                         $", including only 0-9,+,-,*, or /.  Ex: '10-2*6/4'";
                     Console.Write(errMsg);
-                    m_status = Status.PARSE_ERROR;
+                    m_status = Status.INVALID_INPUT;
+                    return result;
                 }
-                
+
+
+                Console.WriteLine($"{i} ------------------------------------");
+                Console.WriteLine("OPERATORS: " + String.Join(",", operatorChars.ToArray()));
+                Console.WriteLine("NUMBERS: " + String.Join(",", numbers.ToArray()));
             }
 
-            return parsedResult;
+            // Finish evalution if opeartor queue is not empty.
+            while (operatorChars.Count > 0)
+            {
+                if (numbers.Count >= 2)
+                {
+                    setRight(numbers.Pop().ToString());
+                    setLeft(numbers.Pop().ToString());
+                    setOperator(operatorChars.Pop().ToString());
+                    int tmpNum = calculate();
+                    numbers.Push(tmpNum);
+                }
+                else
+                {
+                    // Not enough numbers in queue at time of operator evaluation.  An operator/
+                    // operand mismatch has occured.
+                    operatorMismatch = true;
+                    break; // exit for log since error occured.
+                }
+            }
+
+            if (operatorMismatch) // an operator mismatch was detected
+            {
+                string errMsg = $"ERROR: Invalid input string.  There was a mismatch in number of operands" +
+                    $" and operators.";
+                Console.Write(errMsg);
+                m_status = Status.INVALID_INPUT;
+            }
+
+            result = numbers.Pop();
+
+            return result;
         }
 
         // Helper methods //////////////////////////////////////////////////////
@@ -210,11 +281,11 @@ namespace CalculatorNS
         private int getPrecedence(char operator_str)
         {
             int precedence = -1;
-            if (String.Equals(operator_str, '+'))
+            if (String.Equals(operator_str, '-'))
             {
                 precedence = 0;
             }
-            else if (String.Equals(operator_str, '-'))
+            else if (String.Equals(operator_str, '+'))
             {
                 precedence = 0;
             }
@@ -264,9 +335,8 @@ namespace CalculatorNS
             }
             catch (System.OverflowException e)
             {
-
                 Console.WriteLine($"  ERROR: Unable to add values.  '{e}'");
-                m_status = Status.INVALID_INPUT;
+                m_status = Status.OVERFLOW;
             }
 
             return result;
@@ -293,7 +363,18 @@ namespace CalculatorNS
         // Multipy two Int32 values
         private int multiply(int val1, int val2)
         {
-            return val1 * val2;
+            int result = -1;
+            try
+            {
+                result =  val1 * val2;
+            }
+            catch (System.OverflowException e)
+            {
+                Console.WriteLine($"  ERROR: Unable to add values.  '{e}'");
+                m_status = Status.OVERFLOW;
+            }
+
+            return result;
         }
 
         // 
@@ -301,13 +382,20 @@ namespace CalculatorNS
         // Main
         public static void Main()
         {
-            Console.Write("Time to calculate.");
+            Console.WriteLine("Time to calculate things.");
             // Arrange
             Calculator calc = new Calculator();
 
             // Action
-            string inputStr = "3+1+4/6*6*8/3-4*4+7";
-            string actual = calc.parseInput(inputStr);
+            //string inputStr = "3+1+4/6*6*8/3-4*4+7";
+            string inputStr = "10-2*6/4";
+            int actual = calc.evaluateInput(inputStr);
+            Console.WriteLine(inputStr + " = " + actual);
+
+            // Action
+            inputStr = "3+1+4/6*6*8/3-4*4+7";
+            actual = calc.evaluateInput(inputStr);
+            Console.WriteLine(inputStr + " = " + actual);
         }
     }
 }
